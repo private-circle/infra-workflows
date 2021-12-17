@@ -1,0 +1,177 @@
+name: TI - CI
+
+on:
+  workflow_call:
+    secrets:
+      TF_BACKEND_AWS_ACCESS_KEY_ID:
+        required: true
+      TF_BACKEND_AWS_SECRET_ACCESS_KEY:
+        required: true
+      LINODE_API_TOKEN:
+        required: true
+      LINODE_DEFAULT_ROOT_USER_PASSWORD:
+        required: true
+      ANSIBLE_SSH_PUBLIC_KEY:
+        required: true
+      ANSIBLE_SSH_PRIVATE_KEY:
+        required: true
+
+jobs:
+  tf-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    if: github.ref != 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set deployPath variable
+        id: vars
+        run: echo "::set-output name=deployPath::./terraform/live/ti"
+
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
+        with:
+          terragrunt_version: v0.29.8
+
+      - name: Terragrunt Init
+        working-directory: ${{ steps.vars.outputs.deployPath }}
+        id: init
+        run: |
+          terragrunt \
+            run-all --terragrunt-non-interactive init \
+            -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
+            -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY";
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+
+      - name: Terragrunt Plan
+        working-directory: ${{ steps.vars.outputs.deployPath }}
+        id: plan
+        run: |
+          outfile="/tmp/terragrunt-diff.txt"
+          terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
+          echo "::set-output name=DIFF_PATH::$outfile"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+          TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+          TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+
+      - name: Terragrunt Plan status on Pull Request
+        uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          DIFF_PATH: "${{ steps.plan.outputs.DIFF_PATH }}"
+        with:
+          github-token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          script: |
+            const fs = require('fs');
+            const diffContents = fs.readFileSync(`${process.env.DIFF_PATH}`).toString();
+            const output = `#### Terragrunt Plan Diff\`
+            <details>
+              <summary>
+                Show Diff
+              </summary>
+              <p>
+
+              \`\`\`diff\n
+              ${diffContents}
+              \`\`\`
+
+              </p>
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terragrunt Plan Status failed?
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+  tf-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "::set-output name=deployPath::./terraform/live/ti"
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory/ti"
+
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
+        with:
+          terragrunt_version: v0.29.8
+
+      - name: Terragrunt Init
+        working-directory: ${{ steps.vars.outputs.deployPath }}
+        id: init
+        run: |
+          terragrunt \
+            run-all --terragrunt-non-interactive init \
+            -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
+            -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY";
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+
+      - name: Terragrunt Apply
+        working-directory: ${{ steps.vars.outputs.deployPath }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+          TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+          TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+          ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+          ANSIBLE_ROOT_PASSWORD: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+        run: |
+          terragrunt run-all apply \
+            --terragrunt-non-interactive \
+            --terragrunt-parallelism 1 \
+            -auto-approve
+
+      - name: Commit Ansible Inventory Changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: privatecircle-ci
+          author_email: privatecircle-ci@users.noreply.github.com
+          message: 'Added/Updated ansible inventory'
+          add: 'ansible/inventory/'
+
+      - name: Checkout Ansible Repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-ansible
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-ansible
+
+      - name: Run Setup Basic Ansible Playbook for all stacks
+        id: ansible-setup-basic
+        uses: ./infra-ansible/.github/actions/setup-basic
+        with:
+          ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
+          deploy_path: ./terraform/live/ti
+          ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+          ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+          linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
