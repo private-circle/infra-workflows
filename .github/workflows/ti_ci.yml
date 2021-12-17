@@ -30,12 +30,20 @@ jobs:
 
       - name: Set deployPath variable
         id: vars
-        run: echo "::set-output name=deployPath::./terraform/live/ti"
+        run: echo "::set-output name=deployPath::./terraform"
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
         with:
           terragrunt_version: v0.29.8
+
+      - name: Checkout Terraform modules repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-tf-modules
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-tf-modules
 
       - name: Terragrunt Init
         working-directory: ${{ steps.vars.outputs.deployPath }}
@@ -53,16 +61,16 @@ jobs:
       - name: Terragrunt Plan
         working-directory: ${{ steps.vars.outputs.deployPath }}
         id: plan
-        run: |
-          outfile="/tmp/terragrunt-diff.txt"
-          terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
-          echo "::set-output name=DIFF_PATH::$outfile"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
           TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+        run: |
+          outfile="/tmp/terragrunt-diff.txt"
+          terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
+          echo "::set-output name=DIFF_PATH::$outfile"
 
       - name: Terragrunt Plan status on Pull Request
         uses: actions/github-script@0.9.0
@@ -113,13 +121,21 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "::set-output name=deployPath::./terraform/live/ti"
-          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory/ti"
+          echo "::set-output name=deployPath::./terraform"
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
         with:
           terragrunt_version: v0.29.8
+
+      - name: Checkout Terraform modules repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-tf-modules
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-tf-modules
 
       - name: Terragrunt Init
         working-directory: ${{ steps.vars.outputs.deployPath }}
@@ -155,8 +171,8 @@ jobs:
         with:
           author_name: privatecircle-ci
           author_email: privatecircle-ci@users.noreply.github.com
-          message: 'Added/Updated ansible inventory'
-          add: 'ansible/inventory/'
+          message: "Added/Updated ansible inventory"
+          add: "ansible/inventory/"
 
       - name: Checkout Ansible Repo
         uses: actions/checkout@v2
@@ -171,7 +187,7 @@ jobs:
         uses: ./infra-ansible/.github/actions/setup-basic
         with:
           ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ./terraform/live/ti
+          deploy_path: ./terraform
           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
