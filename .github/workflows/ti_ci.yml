@@ -72,7 +72,7 @@ jobs:
           outfile="/tmp/terragrunt-diff.txt"
           terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
           echo "::set-output name=DIFF_PATH::$outfile"
-          
+
       - name: Terragrunt Plan status on Pull Request
         uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -89,10 +89,12 @@ jobs:
                 Show Diff
               </summary>
               <p>
+
               \`\`\`diff\n
               ${diffContents}
               \`\`\`
               </p>
+
             </details>
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
             github.issues.createComment({
@@ -101,6 +103,7 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
+
       - name: Terragrunt Plan Status failed?
         if: steps.plan.outcome == 'failure'
         run: exit 1
