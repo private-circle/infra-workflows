@@ -72,6 +72,7 @@ jobs:
           outfile="/tmp/terragrunt-diff.txt"
           terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
           echo "::set-output name=DIFF_PATH::$outfile"
+          
       - name: Terragrunt Plan status on Pull Request
         uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
