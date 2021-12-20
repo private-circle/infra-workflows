@@ -1,0 +1,49 @@
+name: TI - Ansible Mongodb Standalone
+
+on:
+  workflow_call:
+    inputs:
+      ansible_inventory_filename:
+        description: 'Ansible inventory filename. Eg (hosts_<stack_id>.yml). Filename is relative to inventory folder'
+        required: true
+    secrets:
+      PRIVATECIRCLE_CI_GITHUB_USER_PAT:
+        required: true
+      ANSIBLE_SSH_PRIVATE_KEY:
+        required: true
+      ANSIBLE_VAULT_PASSWORD:
+        required: true
+
+jobs:
+  Ansible:
+    name: Ansible Run
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Set variables
+        id: vars
+        run: |
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory/ti"
+          
+      - name: Checkout Ansible Repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-ansible
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-ansible
+
+      - name: Run Appropriate Ansible Playbook
+        id: ansible-run
+        uses: ./infra-ansible/.github/actions/infra-ansible
+        with:
+          inventory: ${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}
+          requirements: ansible-requirements.yml
+          playbook: setup_mongodb/setup_mongodb_standalone.yml
+          private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+          vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
