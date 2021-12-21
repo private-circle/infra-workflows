@@ -17,6 +17,7 @@ on:
         required: true
       PRIVATECIRCLE_CI_GITHUB_USER_PAT:
         required: true
+        
 jobs:
   tf-plan:
     name: Terraform Plan
@@ -165,6 +166,7 @@ jobs:
             --terragrunt-non-interactive \
             --terragrunt-parallelism 1 \
             -auto-approve
+
       - name: Commit Ansible Inventory Changes
         uses: EndBug/add-and-commit@v7
         with:

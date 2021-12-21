@@ -4,12 +4,11 @@ on:
   workflow_call:
     inputs:
       stack_id:
-        description: 'Identifier for which stack to be deployed (eg pc-linode-infra-parth-mongodb2-xxxxxx)'
         required: true
+        type: string
       cmd:
-        description: 'Whether to destory or delete this stack. Must be destroyed before calling delete'
-        default: "DESTROY"
         required: true
+        type: string
     secrets:
       PRIVATECIRCLE_CI_GITHUB_USER_PAT :
         required: true
@@ -25,19 +24,19 @@ jobs:
 
       - name: Set deployPath variable
         id: vars
-        run: echo "::set-output name=deployPath::./terraform/live/ti"
+        run: echo "::set-output name=deployPath::./terraform"
 
       - name: Copy sample delete folder
-        working-directory: ./terraform/live/ti
+        working-directory: ./terraform
         run: |
-          source_dir="$GITHUB_WORKSPACE/terraform/samples/destroy";
+          source_dir="$GITHUB_WORKSPACE/samples/destroy";
           if ! test -d "$source_dir"; then
             echo "$source_dir not found!";
             exit 1
           fi
 
           rm -rf ${{ github.event.inputs.stack_id }}
-          cp -R ../../samples/destroy ${{ github.event.inputs.stack_id }}
+          cp -R ../samples/destroy ${{ github.event.inputs.stack_id }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
@@ -65,12 +64,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check if destroyed, else fail.
-        working-directory: ./terraform/live/ti
+        working-directory: ./terraform
         run: |
           #!/bin/bash
           set -x
 
-          DIFF=$(diff ${{ github.event.inputs.stack_id}} ../../samples/destroy)
+          DIFF=$(diff ${{ github.event.inputs.stack_id}} ../samples/destroy)
           if [ "$DIFF" != "" ]
           then
               echo "Running DELETE on a live stack. Please run DESTROY first."
@@ -79,7 +78,7 @@ jobs:
 
       - name: Remove stack folder
         run: |
-          rm -rf "$GITHUB_WORKSPACE/terraform/live/ti/${{ github.event.inputs.stack_id }}"
+          rm -rf "$GITHUB_WORKSPACE/terraform/${{ github.event.inputs.stack_id }}"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
