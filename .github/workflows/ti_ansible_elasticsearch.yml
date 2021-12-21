@@ -28,7 +28,7 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory/ti"
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
           
       - name: Checkout Ansible Repo
         uses: actions/checkout@v2
