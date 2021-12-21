@@ -107,6 +107,25 @@ jobs:
       - name: Terragrunt Plan Status failed?
         if: steps.plan.outcome == 'failure'
         run: exit 1
+        
+      - name: Checkout Ansible Repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-ansible
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-ansible
+
+      - name: Run Setup Basic Ansible Playbook for all stacks
+        id: ansible-setup-basic
+        uses: ./infra-ansible/.github/actions/setup-basic
+        with:
+          ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
+          deploy_path: ./terraform
+          ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+          ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+          linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+
 
   tf-apply:
     name: Terraform Apply
@@ -173,20 +192,4 @@ jobs:
           message: "Added/Updated ansible inventory"
           add: "ansible/inventory/"
 
-      - name: Checkout Ansible Repo
-        uses: actions/checkout@v2
-        with:
-          repository: private-circle/infra-ansible
-          ref: main
-          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
-          path: ./infra-ansible
-
-      - name: Run Setup Basic Ansible Playbook for all stacks
-        id: ansible-setup-basic
-        uses: ./infra-ansible/.github/actions/setup-basic
-        with:
-          ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ./terraform
-          ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
-          ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
-          linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+    
