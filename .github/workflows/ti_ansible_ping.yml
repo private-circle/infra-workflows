@@ -11,8 +11,6 @@ on:
         required: true
       ANSIBLE_SSH_PRIVATE_KEY:
         required: true
-      ANSIBLE_VAULT_PASSWORD:
-        required: true
 
 jobs:
   Ansible:
