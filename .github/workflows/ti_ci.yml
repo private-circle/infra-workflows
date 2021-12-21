@@ -17,6 +17,7 @@ on:
         required: true
       PRIVATECIRCLE_CI_GITHUB_USER_PAT:
         required: true
+        
 jobs:
   tf-plan:
     name: Terraform Plan
