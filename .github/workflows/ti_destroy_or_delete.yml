@@ -4,12 +4,11 @@ on:
   workflow_call:
     inputs:
       stack_id:
-        description: 'Identifier for which stack to be deployed (eg pc-linode-infra-parth-mongodb2-xxxxxx)'
         required: true
+        type: string
       cmd:
-        description: 'Whether to destory or delete this stack. Must be destroyed before calling delete'
-        default: "DESTROY"
         required: true
+        type: string
     secrets:
       PRIVATECIRCLE_CI_GITHUB_USER_PAT :
         required: true

@@ -4,31 +4,26 @@ on:
   workflow_call:
     inputs:
       id:
-        description: "Identifier for this deployment (eg parth-mongodb2)"
         required: true
+        type: string
       vm_region:
-        description: "VM region ( eg  ap-west )"
         required: true
-        default: "ap-west"
+        type: string
       vm_count:
-        description: "VM count ( eg  2 )"
         required: true
-        default: "1"
+        type: number
       vm_type:
-        description: "vm type (eg g6-nanode-1 )"
         required: true
-        default: "g6-nanode-1"
+        type: string
       vm_image:
-        description: "VM image (eg linode/ubuntu18.04)"
         required: true
-        default: "linode/ubuntu18.04"
+        type: string
       vm_tags:
-        description: "VM tags (eg terraform-ti,infra)"
         required: true
-        default: "terraform-ti"
+        type: string
       vm_authorized_users:
-        description: "Authorized user emails (eg user1@privatecircle.co,user2@privatecircle.co)"
         required: true
+        type: string
     secrets:
       PRIVATECIRCLE_CI_GITHUB_USER_PAT :
         required: true

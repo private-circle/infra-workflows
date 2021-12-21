@@ -4,8 +4,8 @@ on:
   workflow_call:
     inputs:
       ansible_inventory_filename:
-        description: "Ansible inventory filename. Eg (hosts_<stack_id>.yml). Filename is relative to inventory folder"
         required: true
+        type: string
     secrets:
       PRIVATECIRCLE_CI_GITHUB_USER_PAT:
         required: true

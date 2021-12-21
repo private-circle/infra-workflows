@@ -4,43 +4,35 @@ on:
   workflow_call:
     inputs:
       id:
-        description: "Identifier for this deployment (eg parth-mongodb2)"
         required: true
+        type: string
       config_vm_count:
-        description: "Config vm count ( eg  2 )"
         required: true
-        default: "1"
+        type: number
       config_vm_type:
-        description: "Config vm type (eg g6-nanode-1 )"
         required: true
-        default: "g6-nanode-1"
+        type: string
       mongos_vm_count:
-        description: "Mongos vm count ( eg  2 )"
         required: true
-        default: "1"
+        type: number
       mongos_vm_type:
-        description: "Mongos vm type (eg g6-nanode-1 )"
         required: true
-        default: "g6-nanode-1"
+        type: string
       shard_count:
-        description: "No. of shards ( eg  2 )"
         required: true
-        default: "1"
+        type: number
       shard_vm_type:
-        description: "Shard vm type (eg g6-nanode-1 )"
         required: true
-        default: "g6-nanode-1"
+        type: string
       per_shard_vm_count:
-        description: "VM count in each shard ( eg  2 )"
         required: true
-        default: "1"
+        type: number
       vm_tags:
-        description: "VM tags (eg terraform-ti,infra)"
         required: true
-        default: "terraform-ti"
+        type: string
       vm_authorized_users:
-        description: "Authorized user emails (eg user1@privatecircle.co,user2@privatecircle.co)"
         required: true
+        type: string
     secrets:
       PRIVATECIRCLE_CI_GITHUB_USER_PAT :
         required: true
