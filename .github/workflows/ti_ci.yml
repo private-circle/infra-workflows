@@ -31,7 +31,9 @@ jobs:
 
       - name: Set deployPath variable
         id: vars
-        run: echo "::set-output name=deployPath::./terraform"
+        run: |
+           echo "::set-output name=deployPath::./terraform"
+           echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
