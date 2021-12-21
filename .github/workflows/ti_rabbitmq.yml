@@ -11,7 +11,7 @@ on:
         type: string
       vm_count:
         required: true
-        type: number
+        type: string
       vm_type:
         required: true
         type: string

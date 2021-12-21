@@ -8,25 +8,25 @@ on:
         type: string
       config_vm_count:
         required: true
-        type: number
+        type: string
       config_vm_type:
         required: true
         type: string
       mongos_vm_count:
         required: true
-        type: number
+        type: string
       mongos_vm_type:
         required: true
         type: string
       shard_count:
         required: true
-        type: number
+        type: string
       shard_vm_type:
         required: true
         type: string
       per_shard_vm_count:
         required: true
-        type: number
+        type: string
       vm_tags:
         required: true
         type: string

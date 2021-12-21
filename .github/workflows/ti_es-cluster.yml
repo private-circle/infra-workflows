@@ -11,13 +11,13 @@ on:
         type: string
       master_vm_count:
         required: true
-        type: number
+        type: string
       master_vm_type:
         required: true
         type: string
       data_vm_count:
         required: true
-        type: number
+        type: string
       data_vm_type:
         required: true
         type: string

@@ -46,7 +46,7 @@ jobs:
           dest_dir=${{ steps.vars.outputs.deployID }};
           (
             cd terraform || exit 1;
-            cp -rv ../samples/pc-linodes ti/$dest_dir;
+            cp -rv ../samples/pc-linodes $dest_dir;
             terragrunt_template=../samples/terragrunt.hcl.subdir;
             dest_file="$dest_dir/terragrunt.hcl"
             test -f "$terragrunt_template" && cp -v "$terragrunt_template" "$dest_file"
