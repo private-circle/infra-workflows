@@ -134,7 +134,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: private-circle/infra-tf-modules
-          ref: main
+          ref: 0.1.0
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-tf-modules
 
@@ -179,7 +179,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: private-circle/infra-ansible
-          ref: 0.1.0
+          ref: main
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-ansible
 
