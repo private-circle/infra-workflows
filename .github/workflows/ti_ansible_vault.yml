@@ -1,0 +1,67 @@
+name: TI - Destroy or Delete
+
+on:
+  workflow_call:
+    inputs:
+      password_01:
+        required: true
+        type: string
+      password_02:
+        required: false
+        type: string
+      password_03:
+        required: false
+        type: string
+      password_04:
+        required: false
+        type: string
+      password_05:
+        required: false
+        type: string
+      password_06:
+        required: false
+        type: string
+      password_07:
+        required: false
+        type: string
+      password_08:
+        required: false
+        type: string
+      password_09:
+        required: false
+        type: string
+      password_10:
+        required: false
+        type: string
+    secrets:
+      PRIVATECIRCLE_CI_GITHUB_USER_PAT:
+        required: true
+      ANSIBLE_VAULT_PASSWORD:
+        required: true
+
+jobs:
+  ansible-vault:
+    name: "Ansible vault encryption"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Ansible vault encrypted secrets
+        run: |
+          cleanup() { rm vault_pass_file }
+          trap 'cleanup' ERR EXIT
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass_file
+          for i in {01..10}
+          do
+          if [ -n "${{ github.event.inputs.password_$i }}" ];then 
+          echo "your ansible vault encrypted secret for "${{ github.event.inputs.password$i }}""
+          ansible-vault encrypt_string "${{ github.event.inputs.password$i }}"  --vault-id user@vault_pass_file 
+          echo ""
+          fi
+          done
+          rm vault_pass_file
+
