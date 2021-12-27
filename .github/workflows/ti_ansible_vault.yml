@@ -1,4 +1,4 @@
-name: TI - Destroy or Delete
+name: TI - Ansible Vault
 
 on:
   workflow_call:
@@ -52,16 +52,16 @@ jobs:
 
       - name: Ansible vault encrypted secrets
         run: |
-          cleanup() { rm vault_pass_file }
-          trap 'cleanup' ERR EXIT
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass_file
-          for i in {01..10}
-          do
-          if [ -n "${{ github.event.inputs.password_$i }}" ];then 
-          echo "your ansible vault encrypted secret for "${{ github.event.inputs.password$i }}""
-          ansible-vault encrypt_string "${{ github.event.inputs.password$i }}"  --vault-id user@vault_pass_file 
-          echo ""
+          cleanup() {
+          rm -rf vaultpass.txt
+          }
+          echo "changeme123">vaultpass.txt
+          for i in {01..10};do
+          if [ $(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH") != null ]; then
+          PASSWORD=$(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH")
+          echo "vault encrypted output of PASSWORD_$i"
+          ansible-vault encrypt_string "$PASSWORD" --vault-id user@vaultpass.txt
+          echo 
           fi
           done
-          rm vault_pass_file
 
