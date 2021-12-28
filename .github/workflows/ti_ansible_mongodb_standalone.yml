@@ -48,4 +48,5 @@ jobs:
           requirements: ansible-requirements.yml
           playbook: setup_mongodb/setup_mongodb_standalone.yml
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
-          vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+          infra_ansible_vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+          user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
