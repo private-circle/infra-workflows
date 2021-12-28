@@ -13,6 +13,8 @@ on:
         required: true
       ANSIBLE_VAULT_PASSWORD:
         required: true
+      USER_ANSIBLE_VAULT_PASSWORD:
+        required: true
 
 jobs:
   Ansible:
