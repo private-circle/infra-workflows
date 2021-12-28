@@ -56,7 +56,7 @@ jobs:
           rm -rf vaultpass.txt
           }
           trap 'cleanup' ERR EXIT
-          echo "${{ secrets.USER_ANSIBLE_VAULT_PASSWORD}}">vaultpass.txt
+          echo "${ USER_ANSIBLE_VAULT_PASSWORD }" > vaultpass.txt
           for i in {01..10};do
           if [ $(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH") != null ]; then
           PASSWORD=$(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH")
@@ -66,4 +66,5 @@ jobs:
           fi
           done
           ls -ltr
-
+        env: 
+          USER_ANSIBLE_VAULT_PASSWORD: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
