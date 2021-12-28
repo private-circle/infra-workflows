@@ -11,7 +11,9 @@ on:
         required: true
       ANSIBLE_SSH_PRIVATE_KEY:
         required: true
-      ANSIBLE_VAULT_PASSWORD:
+      INFRA_ANSIBLE_VAULT_PASSWORD:
+        required: true
+      USER_ANSIBLE_VAULT_PASSWORD:
         required: true
 
 jobs:
@@ -45,5 +47,5 @@ jobs:
           inventory: ${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}
           playbook: setup_rabbitmq/setup_rabbitmq.yml
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
-          vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-
+          infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
+          user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
