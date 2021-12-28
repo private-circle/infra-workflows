@@ -52,19 +52,17 @@ jobs:
 
       - name: Ansible vault encrypted secrets
         run: |
-          cleanup() {
-          rm -rf vaultpass.txt
-          }
-          trap 'cleanup' ERR EXIT
-          echo "$USER_ANSIBLE_VAULT_PASSWORD" > vaultpass.txt
+          echo "$USER_ANSIBLE_VAULT_PASSWORD" > user_vault_password.txt
+          sudo chmod 600 user_vault_password.txt
           for i in {01..10};do
           if [ $(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH") != null ]; then
           PASSWORD=$(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH")
           echo "vault encrypted output of PASSWORD_$i"
-          ansible-vault encrypt_string "$PASSWORD" --vault-id user@vaultpass.txt
+          ansible-vault encrypt_string "$PASSWORD" --vault-id user@user_vault_password.txt
           echo 
           fi
           done
+          rm user_vault_password.txt
           ls -ltr
         env: 
           USER_ANSIBLE_VAULT_PASSWORD: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
