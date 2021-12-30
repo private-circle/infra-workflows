@@ -17,6 +17,8 @@ on:
         required: true
       PRIVATECIRCLE_CI_GITHUB_USER_PAT:
         required: true
+      INFRA_ANSIBLE_VAULT_PASSWORD:
+        required: true
         
 jobs:
   tf-plan:
@@ -192,3 +194,4 @@ jobs:
           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+          infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
