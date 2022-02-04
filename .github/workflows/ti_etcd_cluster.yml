@@ -39,7 +39,7 @@ jobs:
 
       - name: Set deployId variable
         id: vars
-        run: echo "::set-output name=deployID::pc-linode-${{ github.event.inputs.id }}-$(openssl rand -hex 32 | cut -c-3)"
+        run: echo "::set-output name=deployID::etcd-${{ github.event.inputs.id }}-$(openssl rand -hex 32 | cut -c-3)"
 
       - name: Create commits
         run: |
