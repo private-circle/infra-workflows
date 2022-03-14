@@ -49,3 +49,4 @@ jobs:
           playbook: setup_pgrepohost/main.yml
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
+          user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
