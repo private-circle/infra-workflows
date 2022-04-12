@@ -1,0 +1,51 @@
+name: TI - Ansible Postgres Restore
+
+on:
+  workflow_call:
+    inputs:
+      ansible_inventory_filename:
+        required: true
+        type: string
+    secrets:
+      PRIVATECIRCLE_CI_GITHUB_USER_PAT:
+        required: true
+      ANSIBLE_SSH_PRIVATE_KEY:
+        required: true
+      INFRA_ANSIBLE_VAULT_PASSWORD:
+        required: true
+      USER_ANSIBLE_VAULT_PASSWORD:
+        required: true
+
+jobs:
+  Ansible:
+    name: Ansible Run
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
+
+      - name: Checkout Ansible Repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-ansible
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-ansible
+
+      - name: Run Appropriate Ansible Playbook
+        id: ansible-deploy
+        uses: ./infra-ansible/.github/actions/infra-ansible
+        with:
+          inventory: ${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}
+          playbook: postgres_restore/main.yml
+          private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+          infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
+          user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
