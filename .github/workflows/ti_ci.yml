@@ -32,7 +32,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    if: github.ref == 'refs/heads/main'
+    if: github.ref != 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -125,7 +125,7 @@ jobs:
     defaults:
       run:
         shell: bash
-#     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -199,7 +199,7 @@ jobs:
         uses: ./infra-ansible/.github/actions/setup-basic
         with:
           ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ${{ inputs.deploy_path }}
+          deploy_path: ${{ steps.vars.outputs.deployPath }}
           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
