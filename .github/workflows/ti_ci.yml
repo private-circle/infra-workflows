@@ -40,9 +40,6 @@ jobs:
       - name: Set deployPath variable
         id: vars
         run: echo "::set-output name=deployPath::${{ inputs.deploy_path }}"
-      
-      - name: Echo
-        run: echo ${{ steps.vars.outputs.deployPath }}
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
