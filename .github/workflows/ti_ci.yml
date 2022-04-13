@@ -19,7 +19,12 @@ on:
         required: true
       INFRA_ANSIBLE_VAULT_PASSWORD:
         required: true
-        
+    inputs:
+      deploy_path:
+        description: 'Specify a deploy path if needs to be changed. Default is "./terraform"'
+        default: './terraform'
+        required: false
+        type: string
 jobs:
   tf-plan:
     name: Terraform Plan
@@ -34,7 +39,7 @@ jobs:
 
       - name: Set deployPath variable
         id: vars
-        run: echo "::set-output name=deployPath::./terraform"
+        run: echo "::set-output name=deployPath::${{ inputs.deploy_path }}"
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
@@ -125,8 +130,9 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "::set-output name=deployPath::./terraform"
+          echo "::set-output name=deployPath::${{ inputs.deploy_path }}"
           echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
+
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
         with:
@@ -190,7 +196,7 @@ jobs:
         uses: ./infra-ansible/.github/actions/setup-basic
         with:
           ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ./terraform
+          deploy_path: ${{ steps.vars.outputs.deployPath }}
           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
