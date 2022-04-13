@@ -19,7 +19,12 @@ on:
         required: true
       INFRA_ANSIBLE_VAULT_PASSWORD:
         required: true
-        
+    inputs:
+      deploy_path:
+        description: 'Specify a deploy path if needs to be changed. Default is "./terraform"'
+        default: './terraform'
+        required: false
+        type: string
 jobs:
   tf-plan:
     name: Terraform Plan
@@ -190,7 +195,7 @@ jobs:
         uses: ./infra-ansible/.github/actions/setup-basic
         with:
           ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ./terraform
+          deploy_path: ${{ inputs.deploy_path }}
           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
