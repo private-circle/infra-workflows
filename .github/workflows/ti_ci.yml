@@ -39,7 +39,10 @@ jobs:
 
       - name: Set deployPath variable
         id: vars
-        run: echo "::set-output name=deployPath::./terraform"
+        run: echo "::set-output name=deployPath::${{ inputs.deploy_path }}"
+      
+      - name: Echo
+        run: echo ${{ steps.vars.outputs.deployPath }}
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
@@ -130,73 +133,77 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "::set-output name=deployPath::./terraform"
+          echo "::set-output name=deployPath::${{ inputs.deploy_path }}"
           echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
-      - name: Setup Terragrunt
-        uses: autero1/action-terragrunt@v1.1.0
-        with:
-          terragrunt_version: v0.29.8
+      
+      - name: Echo
+        run: echo ${{ steps.vars.outputs.deployPath }}
 
-      - name: Checkout Terraform modules repo
-        uses: actions/checkout@v2
-        with:
-          repository: private-circle/infra-tf-modules
-          ref: main
-          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
-          path: ./infra-tf-modules
+#       - name: Setup Terragrunt
+#         uses: autero1/action-terragrunt@v1.1.0
+#         with:
+#           terragrunt_version: v0.29.8
 
-      - name: Terragrunt Init
-        working-directory: ${{ steps.vars.outputs.deployPath }}
-        id: init
-        run: |
-          terragrunt \
-            run-all --terragrunt-non-interactive init \
-            -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
-            -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY";
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+#       - name: Checkout Terraform modules repo
+#         uses: actions/checkout@v2
+#         with:
+#           repository: private-circle/infra-tf-modules
+#           ref: main
+#           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+#           path: ./infra-tf-modules
 
-      - name: Terragrunt Apply
-        working-directory: ${{ steps.vars.outputs.deployPath }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
-          TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
-          TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
-          ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
-          ANSIBLE_ROOT_PASSWORD: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
-        run: |
-          terragrunt run-all apply \
-            --terragrunt-non-interactive \
-            --terragrunt-parallelism 1 \
-            -auto-approve
+#       - name: Terragrunt Init
+#         working-directory: ${{ steps.vars.outputs.deployPath }}
+#         id: init
+#         run: |
+#           terragrunt \
+#             run-all --terragrunt-non-interactive init \
+#             -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
+#             -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY";
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+#           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
 
-      - name: Commit Ansible Inventory Changes
-        uses: EndBug/add-and-commit@v7
-        with:
-          author_name: privatecircle-ci
-          author_email: privatecircle-ci@users.noreply.github.com
-          message: "Added/Updated ansible inventory"
-          add: "ansible/inventory/"
+#       - name: Terragrunt Apply
+#         working-directory: ${{ steps.vars.outputs.deployPath }}
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+#           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+#           TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+#           TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+#           ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+#           ANSIBLE_ROOT_PASSWORD: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+#         run: |
+#           terragrunt run-all apply \
+#             --terragrunt-non-interactive \
+#             --terragrunt-parallelism 1 \
+#             -auto-approve
 
-      - name: Checkout Ansible Repo
-        uses: actions/checkout@v2
-        with:
-          repository: private-circle/infra-ansible
-          ref: main
-          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
-          path: ./infra-ansible
+#       - name: Commit Ansible Inventory Changes
+#         uses: EndBug/add-and-commit@v7
+#         with:
+#           author_name: privatecircle-ci
+#           author_email: privatecircle-ci@users.noreply.github.com
+#           message: "Added/Updated ansible inventory"
+#           add: "ansible/inventory/"
 
-      - name: Run Setup Basic Ansible Playbook for all stacks
-        id: ansible-setup-basic
-        uses: ./infra-ansible/.github/actions/setup-basic
-        with:
-          ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ${{ inputs.deploy_path }}
-          ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
-          ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
-          linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
-          infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
+#       - name: Checkout Ansible Repo
+#         uses: actions/checkout@v2
+#         with:
+#           repository: private-circle/infra-ansible
+#           ref: main
+#           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+#           path: ./infra-ansible
+
+#       - name: Run Setup Basic Ansible Playbook for all stacks
+#         id: ansible-setup-basic
+#         uses: ./infra-ansible/.github/actions/setup-basic
+#         with:
+#           ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
+#           deploy_path: ${{ inputs.deploy_path }}
+#           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+#           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+#           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+#           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
