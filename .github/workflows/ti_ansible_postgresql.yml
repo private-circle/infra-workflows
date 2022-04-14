@@ -6,6 +6,9 @@ on:
       ansible_inventory_filename:
         required: true
         type: string
+      ansible_tags:
+        required: false
+        type: string
     secrets:
       PRIVATECIRCLE_CI_GITHUB_USER_PAT:
         required: true
@@ -50,3 +53,4 @@ jobs:
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
+          ansible_tags: ${{ github.event.inputs.ansible_tags }}
