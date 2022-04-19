@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: private-circle/infra-ansible
-          ref: test-tags
+          ref: fix-fluentbit
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-ansible
 
