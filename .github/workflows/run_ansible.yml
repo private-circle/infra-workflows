@@ -1,9 +1,15 @@
-name: TI - Ansible Elasticsearch
+name: Ansible
 
 on:
   workflow_call:
     inputs:
       ansible_inventory_filename:
+        required: true
+        type: string
+      ansible_tags:
+        required: false
+        type: string
+      ansible_playbook:
         required: true
         type: string
     secrets:
@@ -12,9 +18,9 @@ on:
       ANSIBLE_SSH_PRIVATE_KEY:
         required: true
       INFRA_ANSIBLE_VAULT_PASSWORD:
-        required: true
+        required: false
       USER_ANSIBLE_VAULT_PASSWORD:
-        required: true
+        required: false
 
 jobs:
   Ansible:
@@ -26,12 +32,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: Set variables
         id: vars
         run: |
           echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
-          
+
       - name: Checkout Ansible Repo
         uses: actions/checkout@v2
         with:
@@ -41,12 +47,13 @@ jobs:
           path: ./infra-ansible
 
       - name: Run Appropriate Ansible Playbook
-        id: ansible-deploy
+        id: ansible-run
         uses: ./infra-ansible/.github/actions/infra-ansible
         with:
           inventory: ${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}
           requirements: ansible-requirements.yml
-          playbook: setup_elasticsearch/main.yml
+          playbook: ${{ github.event.inputs.ansible_playbook }}
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
+          ansible_tags: ${{ github.event.inputs.ansible_tags }}

@@ -1,4 +1,4 @@
-name: TI - Ansible Vault
+name: Ansible Vault
 
 on:
   workflow_call:
@@ -60,9 +60,9 @@ jobs:
           PASSWORD=$(jq -r ".inputs.password_$i" "$GITHUB_EVENT_PATH")
           echo "Ansible-vault encrypted secret for PASSWORD_$i"
           ansible-vault encrypt_string "$PASSWORD" --vault-id user@user_vault_password.txt
-          echo 
+          echo
           fi
           done
           rm user_vault_password.txt
-        env: 
+        env:
           USER_ANSIBLE_VAULT_PASSWORD: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
