@@ -18,9 +18,9 @@ on:
       ANSIBLE_SSH_PRIVATE_KEY:
         required: true
       INFRA_ANSIBLE_VAULT_PASSWORD:
-        required: true
+        required: false
       USER_ANSIBLE_VAULT_PASSWORD:
-        required: true
+        required: false
 
 jobs:
   Ansible:
