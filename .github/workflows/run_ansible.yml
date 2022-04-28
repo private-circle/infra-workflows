@@ -47,7 +47,7 @@ jobs:
           path: ./infra-ansible
           
       - run: |
-          echo "${{ github.event.inputs.ansible_playbook }}"
+          echo "${{ inputs.ansible_playbook }}"
           echo "${{ github.event.inputs.ansible_inventory_filename }}"
       - name: Run Appropriate Ansible Playbook
         id: ansible-run
@@ -55,7 +55,7 @@ jobs:
         with:
           inventory: ${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}
           requirements: ansible-requirements.yml
-          playbook: ${{ github.event.inputs.ansible_playbook }}
+          playbook: ${{ inputs.ansible_playbook }}
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
