@@ -47,8 +47,8 @@ jobs:
           path: ./infra-ansible
           
       - run: |
-          echo ${{ github.event.inputs.ansible_playbook }}
-          echo ${{ github.event.inputs.inventory_filename }}
+          echo "${{ github.event.inputs.ansible_playbook }}"
+          echo "${{ github.event.inputs.ansible_inventory_filename }}"
       - name: Run Appropriate Ansible Playbook
         id: ansible-run
         uses: ./infra-ansible/.github/actions/infra-ansible
