@@ -46,7 +46,8 @@ jobs:
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-ansible
           
-
+      - run: echo ${{ github.event.inputs.ansible_playbook }}
+      
       - name: Run Appropriate Ansible Playbook
         id: ansible-run
         uses: ./infra-ansible/.github/actions/infra-ansible
