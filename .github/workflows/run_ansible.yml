@@ -9,6 +9,9 @@ on:
       ansible_tags:
         required: false
         type: string
+      ansible_extra_vars:
+        required: false
+        type: string
       ansible_playbook:
         required: true
         type: string
@@ -42,10 +45,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: private-circle/infra-ansible
-          ref: main
+          ref: pass-extra-vars
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-ansible
-          
+
+      - run: echo ${{ inputs.ansible_extra_vars }}
+
       - name: Run Appropriate Ansible Playbook
         id: ansible-run
         uses: ./infra-ansible/.github/actions/infra-ansible
@@ -57,3 +62,5 @@ jobs:
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
           ansible_tags: ${{ github.event.inputs.ansible_tags }}
+          ansible_extra_vars: ${{ inputs.ansible_extra_vars }}
+
