@@ -9,6 +9,9 @@ on:
       ansible_tags:
         required: false
         type: string
+      ansible_extra_vars:
+        required: false
+        type: string
       ansible_playbook:
         required: true
         type: string
@@ -45,7 +48,7 @@ jobs:
           ref: main
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-ansible
-          
+
       - name: Run Appropriate Ansible Playbook
         id: ansible-run
         uses: ./infra-ansible/.github/actions/infra-ansible
@@ -56,4 +59,6 @@ jobs:
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
-          ansible_tags: ${{ github.event.inputs.ansible_tags }}
+          ansible_tags: ${{ inputs.ansible_tags }}
+          ansible_extra_vars: ${{ inputs.ansible_extra_vars }}
+
