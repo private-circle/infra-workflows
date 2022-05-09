@@ -158,6 +158,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+          TF_VAR_github_token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
 
       - name: Terragrunt Apply
         working-directory: ${{ steps.vars.outputs.deployPath }}
@@ -167,6 +168,7 @@ jobs:
           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
           TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+          TF_VAR_github_token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
           ANSIBLE_ROOT_PASSWORD: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
         run: |
