@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: private-circle/infra-workflows
-          ref: main
+          ref: terraform-github
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-workflows
 
