@@ -1,0 +1,129 @@
+name: "Run Ansible Vault Encrytion"
+description: "Runs Ansible on PrivateCircle infra"
+branding:
+  icon: "terminal"
+  color: "blue"
+inputs:
+  playbook:
+    description: Ansible playbook filepath
+    required: true
+  user_ansible_vault_password:
+    description: User Ansible Vault Password
+    required: true
+  deployPath:
+    description: Terraform deploy path
+    required: true
+  aws_access_key_id:
+    description: Aws Access Key Id
+    required: true
+  aws_secret_access_key:
+    description: Aws Secret Access Key
+    required: true
+  linode_token:
+    description: Linode token
+    required: true
+  root_password:
+    description: Root password
+    required: true
+  github_token:
+    description: Github token
+    required: true
+  infra_ansible_vault_password:
+    description: Infra Ansible Vault Password
+    required: true
+  sshkey:
+    description: SSHKEY
+    required: true
+  ansible_ssh_private_key:
+    description: SSH PRIVATE KEY
+    required: true
+
+jobs:
+  ansible-vault:
+    name: Ansible Vault
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
+        with:
+          terragrunt_version: v0.29.8
+
+      - name: Checkout Terraform modules repo
+        uses: actions/checkout@v2
+        with:
+          repository: private-circle/infra-tf-modules
+          ref: main
+          token: ${{ inputs.github_token }}
+          path: ./infra-tf-modules
+
+      - name: Terragrunt Init
+        working-directory: ${{ steps.vars.outputs.deployPath }}
+        id: init
+        run: |
+          terragrunt \
+            run-all --terragrunt-non-interactive init \
+            -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
+            -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY";
+        env:
+          AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+          TF_VAR_linode_token: ${{ inputs.linode_token }}
+          TF_VAR_github_token: ${{ inputs.github_token }}
+
+      - name: Terragrunt Plan
+        working-directory: ${{ steps.vars.outputs.deployPath }}
+        id: plan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+          TF_VAR_linode_token: ${{ inputs.linode_token }
+          TF_VAR_root_password: ${{ inputs.root_password }}
+          TF_VAR_github_token: ${{ inputs.github_token }}
+          TF_VAR_infra_ansible_vault_password: ${{ inputs.infra_ansible_vault_password }}
+          TF_VAR_sshkey: ${{ inputs.ansible_ssh_public_key }}
+          TF_VAR_ansible_ssh_private_key: ${{ inputs.ansible_ssh_private_key }}
+        run: |
+          outfile="/tmp/terragrunt-diff.txt"
+          terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
+          echo "::set-output name=DIFF_PATH::$outfile"
+
+      - name: Terragrunt Plan status on Pull Request
+        uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          DIFF_PATH: "${{ steps.plan.outputs.DIFF_PATH }}"
+        with:
+          github-token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          script: |
+            const fs = require('fs');
+            const diffContents = fs.readFileSync(`${process.env.DIFF_PATH}`).toString();
+            const output = `#### Terragrunt Plan Diff\`
+            <details>
+              <summary>
+                Show Diff
+              </summary>
+              <p>
+
+              \`\`\`diff\n
+              ${diffContents}
+              \`\`\`
+              </p>
+
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terragrunt Plan Status failed?
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
