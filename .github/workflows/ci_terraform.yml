@@ -37,6 +37,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - run: ls
+
       - name: Terraform Plan
         id: tf-plan
         uses: ./infra-workflows/.github/actions/terraform_plan
