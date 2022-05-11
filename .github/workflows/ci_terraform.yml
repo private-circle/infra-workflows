@@ -39,7 +39,7 @@ jobs:
 
       - name: Terraform Plan
         id: tf-plan
-        uses: ./infra-workflow/.github/actions/terraform_plan
+        uses: ./infra-workflows/.github/actions/terraform_plan
         with:
           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
           deployPath: ${{ inputs.deploy_path }}"
