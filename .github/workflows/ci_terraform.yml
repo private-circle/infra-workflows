@@ -36,8 +36,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - run: ls
+        with:
+          repository: private-circle/infra-workflows
+          ref: main
+          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+          path: ./infra-workflows
 
       - name: Terraform Plan
         id: tf-plan
