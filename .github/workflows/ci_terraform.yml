@@ -19,6 +19,8 @@ on:
         required: true
       INFRA_ANSIBLE_VAULT_PASSWORD:
         required: true
+      USER_ANSIBLE_VAULT_PASSWORD:
+        required: true
     inputs:
       deploy_path:
         description: 'Specify a deploy path if needs to be changed. Default is "./terraform"'
@@ -187,7 +189,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: private-circle/infra-ansible
-          ref: main
+          ref: sedhupathygit-patch-1
           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
           path: ./infra-ansible
 
@@ -201,3 +203,4 @@ jobs:
           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
+          user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
