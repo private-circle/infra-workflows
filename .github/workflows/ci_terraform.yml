@@ -133,7 +133,7 @@ jobs:
         id: vars
         run: |
           echo "::set-output name=deployPath::${{ inputs.deploy_path }}"
-          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory/*"
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
