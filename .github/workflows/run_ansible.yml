@@ -39,7 +39,7 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory"
+          echo "::set-output name=ansible_inventory_path::$(pwd)/ansible/inventory/*"
 
       - name: Checkout Ansible Repo
         uses: actions/checkout@v2
@@ -53,7 +53,7 @@ jobs:
         id: ansible-run
         uses: ./infra-ansible/.github/actions/infra-ansible
         with:
-          inventory: ${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}
+          inventory: "${{ steps.vars.outputs.ansible_inventory_path }}/${{ github.event.inputs.ansible_inventory_filename }}/hosts.yml"
           requirements: ansible-requirements.yml
           playbook: ${{ inputs.ansible_playbook }}
           private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
