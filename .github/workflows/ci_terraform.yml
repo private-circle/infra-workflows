@@ -68,18 +68,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
-          
-      - name: Terragrunt state mv
-        working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-test-6c2
-        id: state
-        run: |
-           terraform state mv 'module.postgresql-cluster.linode_instance.postgresql[0]' 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-01"]'
-           terraform state mv 'module.postgresql-cluster.linode_instance.postgresql[1]' 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-02"]'
-           terraform state mv 'module.postgresql-cluster.linode_instance.postgresql[2]' 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-03"]'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
 
       - name: Terragrunt Plan
         working-directory: ${{ steps.vars.outputs.deployPath }}
