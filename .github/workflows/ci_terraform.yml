@@ -57,13 +57,10 @@ jobs:
           path: ./infra-tf-modules
 
       - name: Terragrunt Init
-        working-directory: ${{ steps.vars.outputs.deployPath }}
+        working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-test-6c2
         id: init
         run: |
-          terragrunt \
-            run-all --terragrunt-non-interactive init \
-            -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
-            -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY";
+           terraform state mv module.postgresql-cluster.linode_instance.postgresql[0] module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-01"]
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
