@@ -57,7 +57,7 @@ jobs:
           path: ./infra-tf-modules
 
       - name: Terragrunt Init
-        working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-test-6c2
+        working-directory: ${{ steps.vars.outputs.deployPath }}
         id: init
         run: |
             terragrunt \
