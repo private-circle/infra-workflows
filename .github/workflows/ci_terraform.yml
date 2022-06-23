@@ -81,66 +81,64 @@ jobs:
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
       #     TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
 
-      # - name: Terraform state change
-      #   working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-test-6c2
-      #   id: tf-state
-      #   run: | 
-      #     terraform state mv 'module.postgresql-cluster.linode_instance.postgresql[0]' 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-01"]'
-      #     terraform state mv 'module.postgresql-cluster.linode_instance.postgresql[1]' 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-02"]'
-      #     terraform state mv 'module.postgresql-cluster.linode_instance.postgresql[2]' 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-03"]'
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
-      #     TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
-
-      - name: Terragrunt Plan
-        working-directory: ${{ steps.vars.outputs.deployPath }}
-        id: plan
+      - name: Terraform state change
+        working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-test-6c2
+        id: tf-state
+        run: | 
+          terraform state  rm 'module.postgresql-cluster.linode_instance.haproxy'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
-          TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
-          TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
-        run: |
-          outfile="/tmp/terragrunt-diff.txt"
-          terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
-          echo "::set-output name=DIFF_PATH::$outfile"
 
-      - name: Terragrunt Plan status on Pull Request
-        uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
-        env:
-          DIFF_PATH: "${{ steps.plan.outputs.DIFF_PATH }}"
-        with:
-          github-token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
-          script: |
-            const fs = require('fs');
-            const diffContents = fs.readFileSync(`${process.env.DIFF_PATH}`).toString();
-            const output = `#### Terragrunt Plan Diff\`
-            <details>
-              <summary>
-                Show Diff
-              </summary>
-              <p>
+#       - name: Terragrunt Plan
+#         working-directory: ${{ steps.vars.outputs.deployPath }}
+#         id: plan
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+#           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+#           TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+#           TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+#         run: |
+#           outfile="/tmp/terragrunt-diff.txt"
+#           terragrunt run-all --terragrunt-non-interactive plan -no-color 2>&1 >> "$outfile"
+#           echo "::set-output name=DIFF_PATH::$outfile"
 
-              \`\`\`diff\n
-              ${diffContents}
-              \`\`\`
-              </p>
+#       - name: Terragrunt Plan status on Pull Request
+#         uses: actions/github-script@0.9.0
+#         if: github.event_name == 'pull_request'
+#         env:
+#           DIFF_PATH: "${{ steps.plan.outputs.DIFF_PATH }}"
+#         with:
+#           github-token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+#           script: |
+#             const fs = require('fs');
+#             const diffContents = fs.readFileSync(`${process.env.DIFF_PATH}`).toString();
+#             const output = `#### Terragrunt Plan Diff\`
+#             <details>
+#               <summary>
+#                 Show Diff
+#               </summary>
+#               <p>
 
-            </details>
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+#               \`\`\`diff\n
+#               ${diffContents}
+#               \`\`\`
+#               </p>
 
-      - name: Terragrunt Plan Status failed?
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
+#             </details>
+#             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+#             github.issues.createComment({
+#               issue_number: context.issue.number,
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               body: output
+#             })
+
+#       - name: Terragrunt Plan Status failed?
+#         if: steps.plan.outcome == 'failure'
+#         run: exit 1
 
   tf-apply:
     name: Terraform Apply
