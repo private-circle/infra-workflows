@@ -85,7 +85,7 @@ jobs:
         working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-test-6c2
         id: tf-state
         run: | 
-          terraform import 'module.postgresql-cluster.linode_instance.haproxy'
+          terraform import 'module.postgresql-cluster.linode_instance.haproxy 0'
           terraform state rm 'module.postgresql-cluster.linode_instance.postgresql'
           terraform import 'module.postgresql-cluster.linode_instance.postgresql["sp-test-rs-01"] sp-test-rs-01'
         env:
