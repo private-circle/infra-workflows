@@ -155,7 +155,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+#     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -216,22 +216,22 @@ jobs:
           message: "Added/Updated ansible inventory"
           add: "ansible/inventory/"
 
-      - name: Checkout Ansible Repo
-        uses: actions/checkout@v2
-        with:
-          repository: private-circle/infra-ansible
-          ref: main
-          token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
-          path: ./infra-ansible
+#       - name: Checkout Ansible Repo
+#         uses: actions/checkout@v2
+#         with:
+#           repository: private-circle/infra-ansible
+#           ref: main
+#           token: ${{ secrets.PRIVATECIRCLE_CI_GITHUB_USER_PAT }}
+#           path: ./infra-ansible
 
-      - name: Run Setup Basic Ansible Playbook for all stacks
-        id: ansible-setup-basic
-        uses: ./infra-ansible/.github/actions/setup-basic
-        with:
-          ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
-          deploy_path: ${{ steps.vars.outputs.deployPath }}
-          ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
-          ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
-          linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
-          infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
-          user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
+#       - name: Run Setup Basic Ansible Playbook for all stacks
+#         id: ansible-setup-basic
+#         uses: ./infra-ansible/.github/actions/setup-basic
+#         with:
+#           ansible_inventory_path: ${{ steps.vars.outputs.ansible_inventory_path }}
+#           deploy_path: ${{ steps.vars.outputs.deployPath }}
+#           ansible_ssh_private_key: ${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}
+#           ansible_ssh_public_key: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+#           linode_instance_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+#           infra_ansible_vault_password: ${{ secrets.INFRA_ANSIBLE_VAULT_PASSWORD }}
+#           user_ansible_vault_password: ${{ secrets.USER_ANSIBLE_VAULT_PASSWORD }}
