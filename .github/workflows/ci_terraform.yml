@@ -87,18 +87,18 @@ jobs:
         #   TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
 
 
-      - name: Terraform state change
-        working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-tf-test-285
-        id: tf-state
-        run: | 
-          terraform state rm 'module.postgresql-cluster.linode_instance.postgresql'
-          terraform import module.postgresql-cluster.linode_instance.postgresql[\"sp-tf-test-rs\"] 36995630
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
-          TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
-          TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
+#       - name: Terraform state change
+#         working-directory: ${{ steps.vars.outputs.deployPath }}/psql-sp-tf-test-285
+#         id: tf-state
+#         run: | 
+#           terraform state rm 'module.postgresql-cluster.linode_instance.postgresql'
+#           terraform import module.postgresql-cluster.linode_instance.postgresql[\"sp-tf-test-rs\"] 36995630
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.TF_BACKEND_AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_BACKEND_AWS_SECRET_ACCESS_KEY }}
+#           TF_VAR_linode_token: ${{ secrets.LINODE_API_TOKEN }}
+#           TF_VAR_sshkey: ${{ secrets.ANSIBLE_SSH_PUBLIC_KEY }}
+#           TF_VAR_root_password: ${{ secrets.LINODE_DEFAULT_ROOT_USER_PASSWORD }}
 
       - name: Terragrunt Plan
         working-directory: ${{ steps.vars.outputs.deployPath }}
